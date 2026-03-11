@@ -1,32 +1,41 @@
+def is_valid(adjacency, selected, vertex):
+    """Можно ли добавить вершину в множество?"""
+    return adjacency[vertex].isdisjoint(selected)
+
+
+def explore(adjacency, total_vertices, current_vertex, selected, best_found):
+    """Рекурсивный перебор всех вершин"""
+
+    # Все вершины рассмотрены
+    if current_vertex > total_vertices:
+        if len(selected) > len(best_found):
+            best_found.clear()
+            best_found.update(selected)
+        return
+
+    # Ветка 1: НЕ берём вершину
+    explore(adjacency, total_vertices, current_vertex + 1, selected, best_found)
+
+    # Ветка 2: БЕРЁМ вершину (если нет конфликта)
+    if is_valid(adjacency, selected, current_vertex):
+        selected.add(current_vertex)
+        explore(adjacency, total_vertices, current_vertex + 1, selected, best_found)
+        selected.remove(current_vertex)  # откат
+
+
 def find_max_independent_set(total_vertices, connections):
 
-    # Список соседей
+    # Строим список соседей
     adjacency = {v: set() for v in range(1, total_vertices + 1)}
     for a, b in connections:
         adjacency[a].add(b)
         adjacency[b].add(a)
 
-    best_found = []
+    best_found = set()
+    selected = set()
 
-    def explore(current_vertex, selected):
-        nonlocal best_found
+    explore(adjacency, total_vertices, 1, selected, best_found)
 
-        # Все вершины рассмотрены
-        if current_vertex > total_vertices:
-            if len(selected) > len(best_found):
-                best_found = selected.copy()
-            return
-
-        # Ветка 1: НЕ берём вершину
-        explore(current_vertex + 1, selected)
-
-        # Ветка 2: БЕРЁМ вершину (если нет конфликта)
-        if adjacency[current_vertex].isdisjoint(selected):
-            selected.add(current_vertex)
-            explore(current_vertex + 1, selected)
-            selected.remove(current_vertex)  # откат
-
-    explore(1, set())
     return best_found
 
 
@@ -43,5 +52,3 @@ connections = [
 answer = find_max_independent_set(7, connections)
 print(f"Максимальное независимое множество: {sorted(answer)}")
 print(f"Размер: {len(answer)}")
-
-
