@@ -1,0 +1,67 @@
+def max_independent_set(n, edges):
+    # Список соседей
+    neighbors = {v: set() for v in range(1, n + 1)}
+    for i, j in edges:
+        neighbors[i].add(j)
+        neighbors[j].add(i)
+
+    best = []  # лучшее найденное множество
+
+    def backtrack(vertex, current):
+        nonlocal best
+
+        # Если рассмотрели все вершины — проверяем результат
+        if vertex > n:
+            if len(current) > len(best):
+                best = current.copy()
+            return
+
+        # Ветвь 1: НЕ берём текущую вершину
+        backtrack(vertex + 1, current)
+
+        # Ветвь 2: БЕРЁМ текущую вершину (если нет конфликта)
+        if neighbors[vertex].isdisjoint(current):
+            current.add(vertex)
+            backtrack(vertex + 1, current)
+            current.remove(vertex)  # откат
+
+    backtrack(1, set())
+    return best
+
+
+# ── Граф с картинки ──────────────────────────
+#  Рёбра по картинке: 1-2, 1-3, 2-3, 2-5, 3-4, 3-6, 3-7, 4-7, 5-7, 6-7
+edges = [
+    (1, 2), (1, 3),
+    (2, 3), (2, 5),
+    (3, 4), (3, 6), (3, 7),
+    (4, 7),
+    (5, 7),
+    (6, 7)
+]
+
+result = max_independent_set(7, edges)
+print(f"Максимальное независимое множество: {sorted(result)}")
+print(f"Размер: {len(result)}")
+```
+
+**Вывод:**
+```
+Максимальное независимое множество: [1, 4, 5, 6]
+Размер: 4
+```
+
+---
+
+## Как работает алгоритм
+```
+Дерево перебора для вершины v:
+
+         backtrack(v)
+        /             \
+  НЕ берём v        Берём v
+  (всегда можно)    (только если нет соседей в current)
+      |                  |
+ backtrack(v+1)     backtrack(v+1)
+                         |
+                    [откат: убираем v]
