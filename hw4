@@ -1,37 +1,37 @@
-def max_independent_set(n, edges):
+def find_max_independent_set(total_vertices, connections):
+
     # Список соседей
-    neighbors = {v: set() for v in range(1, n + 1)}
-    for i, j in edges:
-        neighbors[i].add(j)
-        neighbors[j].add(i)
+    adjacency = {v: set() for v in range(1, total_vertices + 1)}
+    for a, b in connections:
+        adjacency[a].add(b)
+        adjacency[b].add(a)
 
-    best = []  # лучшее найденное множество
+    best_found = []
 
-    def backtrack(vertex, current):
-        nonlocal best
+    def explore(current_vertex, selected):
+        nonlocal best_found
 
-        # Если рассмотрели все вершины — проверяем результат
-        if vertex > n:
-            if len(current) > len(best):
-                best = current.copy()
+        # Все вершины рассмотрены
+        if current_vertex > total_vertices:
+            if len(selected) > len(best_found):
+                best_found = selected.copy()
             return
 
-        # Ветвь 1: НЕ берём текущую вершину
-        backtrack(vertex + 1, current)
+        # Ветка 1: НЕ берём вершину
+        explore(current_vertex + 1, selected)
 
-        # Ветвь 2: БЕРЁМ текущую вершину (если нет конфликта)
-        if neighbors[vertex].isdisjoint(current):
-            current.add(vertex)
-            backtrack(vertex + 1, current)
-            current.remove(vertex)  # откат
+        # Ветка 2: БЕРЁМ вершину (если нет конфликта)
+        if adjacency[current_vertex].isdisjoint(selected):
+            selected.add(current_vertex)
+            explore(current_vertex + 1, selected)
+            selected.remove(current_vertex)  # откат
 
-    backtrack(1, set())
-    return best
+    explore(1, set())
+    return best_found
 
 
 # ── Граф с картинки ──────────────────────────
-#  Рёбра по картинке: 1-2, 1-3, 2-3, 2-5, 3-4, 3-6, 3-7, 4-7, 5-7, 6-7
-edges = [
+connections = [
     (1, 2), (1, 3),
     (2, 3), (2, 5),
     (3, 4), (3, 6), (3, 7),
@@ -40,12 +40,8 @@ edges = [
     (6, 7)
 ]
 
-result = max_independent_set(7, edges)
-print(f"Максимальное независимое множество: {sorted(result)}")
-print(f"Размер: {len(result)}")
-
-
-Максимальное независимое множество: [1, 4, 5, 6]
-Размер: 4
+answer = find_max_independent_set(7, connections)
+print(f"Максимальное независимое множество: {sorted(answer)}")
+print(f"Размер: {len(answer)}")
 
 
